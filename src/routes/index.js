@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import Movies from '../pages/Movies';
 
-import StackRoutes from './StackRoutes';
+import StackRoutes from './stackRoutes';
 
 const Drawer = createDrawerNavigator();
 
