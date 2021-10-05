@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, ActivityIndicator } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
 
 import Header from '../../components/Header';
 import SliderItem from '../../components/SliderItem';
@@ -19,15 +21,19 @@ import {
 
 import api, { key } from '../../services/api';
 
-import { getListMovies } from '../../utils/movie';
+import { getListMovies, randomBanner } from '../../utils/movie';
 
 export default function Home() {
   const [nowMovies, setNowMovies] = useState([]);
   const [popularMovies, setPopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [bannerMovie, setBannerMovie] = useState({});
+  const navigation = useNavigation();
 
   useEffect(() => {
     let isActive = true;
+    const ac = new AbortController();
 
     const getMovies = async () => {
       const apiSetting = {
@@ -43,18 +49,42 @@ export default function Home() {
         api.get('/movie/popular', apiSetting),
         api.get('/movie/top_rated', apiSetting)
       ]);
+      
+      if (isActive) {
+        const nowMovies = getListMovies(10, nowData.data.results);
+        const popularMovies = getListMovies(10, popularData.data.results);
+        const topMovies = getListMovies(10, topData.data.results);
 
-      const nowMovies = getListMovies(10, nowData.data.results);
-      const popularMovies = getListMovies(10, popularData.data.results);
-      const topMovies = getListMovies(10, topData.data.results);
+        const randomMovie = randomBanner(nowData.data.results);
+        setBannerMovie(nowData.data.results[randomMovie]);
 
-      setNowMovies(nowMovies);
-      setPopularMovies(popularMovies);
-      setTopMovies(topMovies);
+        setNowMovies(nowMovies);
+        setPopularMovies(popularMovies);
+        setTopMovies(topMovies);
+
+        setLoading(false);
+      }
     }
 
     getMovies();
+
+    return () => {
+      isActive = false;
+      ac.abort();
+    }
   }, [])
+
+  const navigateDetailPage = (movie) => {
+    navigation.navigate('Detail', { id: movie.id });
+  }
+
+  if (loading) {
+    return (
+      <Container>
+        <ActivityIndicator size="large" color="#FFF" />
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -75,17 +105,17 @@ export default function Home() {
         <Title>Em cartaz</Title>
         <BannerButton
           activeOpacity={.85}
-          onPress={() => alert('teste')}
+          onPress={() => navigateDetailPage(bannerMovie)}
         >
           <Banner
-            source={{ uri: 'https://source.unsplash.com/random' }}
+            source={{ uri: `https://image.tmdb.org/t/p/original/${bannerMovie.poster_path}` }}
             resizeMethod="resize"
           />
         </BannerButton>
         <SliderMovies
           horizontal={true}
           data={nowMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />
@@ -94,7 +124,7 @@ export default function Home() {
         <SliderMovies
           horizontal={true}
           data={popularMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />
@@ -103,7 +133,7 @@ export default function Home() {
         <SliderMovies
           horizontal={true}
           data={topMovies}
-          renderItem={({ item }) => <SliderItem data={item} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />

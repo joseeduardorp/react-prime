@@ -10,9 +10,9 @@ import {
   Rate
 } from './styles';
 
-export default function SliderItem({ data }) {
+export default function SliderItem({ data, navigatePage }) {
   return (
-    <Container activeOpacity={.85}>
+    <Container activeOpacity={.85} onPress={() => navigatePage(data)}>
       <BannerItem
         source={{ uri: `https://image.tmdb.org/t/p/original/${data.poster_path}` }}
         resizeMethod="resize"
