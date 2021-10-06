@@ -29,6 +29,7 @@ export default function Home() {
   const [topMovies, setTopMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bannerMovie, setBannerMovie] = useState({});
+  const [searchInput, setSearchInput] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -74,8 +75,15 @@ export default function Home() {
     }
   }, [])
 
-  const navigateDetailPage = (movie) => {
+  const navigateDetailsPage = (movie) => {
     navigation.navigate('Detail', { id: movie.id });
+  }
+
+  const handleSearchMovie = () => {
+    if (searchInput.trim() === '') return;
+
+    navigation.navigate("Search", { name: searchInput });
+    setSearchInput('');
   }
 
   if (loading) {
@@ -94,9 +102,11 @@ export default function Home() {
         <Input
           placeholder="Ex Vingadores"
           placeholderTextColor="#DDD"
+          value={searchInput}
+          onChangeText={(text) => setSearchInput(text)}
         />
 
-        <SearchButton>
+        <SearchButton onPress={handleSearchMovie} activeOpacity={.85}>
           <Feather name="search" size={30} color="#FFF" />
         </SearchButton>
       </SearchContainer>
@@ -105,7 +115,7 @@ export default function Home() {
         <Title>Em cartaz</Title>
         <BannerButton
           activeOpacity={.85}
-          onPress={() => navigateDetailPage(bannerMovie)}
+          onPress={() => navigateDetailsPage(bannerMovie)}
         >
           <Banner
             source={{ uri: `https://image.tmdb.org/t/p/original/${bannerMovie.poster_path}` }}
@@ -115,7 +125,7 @@ export default function Home() {
         <SliderMovies
           horizontal={true}
           data={nowMovies}
-          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailsPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />
@@ -124,7 +134,7 @@ export default function Home() {
         <SliderMovies
           horizontal={true}
           data={popularMovies}
-          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailsPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />
@@ -133,7 +143,7 @@ export default function Home() {
         <SliderMovies
           horizontal={true}
           data={topMovies}
-          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailPage} />}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={navigateDetailsPage} />}
           keyExtractor={(item) => String(item.id)}
           showsHorizontalScrollIndicator={false}
         />

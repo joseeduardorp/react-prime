@@ -24,11 +24,14 @@ import {
 
 import api, { key } from '../../services/api';
 
+import { deleteMovie, hasMovie, saveMovie } from '../../utils/storage';
+
 export default function Detail() {
   const navigation = useNavigation();
   const route = useRoute();
   const [movie, setMovie] = useState({});
   const [openLink, setOpenLink] = useState(false);
+  const [favoriteMovie, setFavoriteMovie] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -45,7 +48,10 @@ export default function Detail() {
       });
 
       if (isActive) {
+        const isFavorite = await hasMovie(response.data);
+        
         setMovie(response.data);
+        setFavoriteMovie(isFavorite);
       }
     }
 
@@ -58,6 +64,16 @@ export default function Detail() {
     }
   }, [])
 
+  const handleFavoriteMovie = async (movie) => {
+    if (favoriteMovie) {
+      await deleteMovie(movie.id);
+      setFavoriteMovie(false);
+    } else {
+      saveMovie('my-movies', movie);
+      setFavoriteMovie(true);
+    }
+  }
+
   return (
     <Container>
       <Header>
@@ -69,9 +85,9 @@ export default function Detail() {
           />
         </HeaderButton>
 
-        <HeaderButton activeOpacity={.85}>
+        <HeaderButton activeOpacity={.85} onPress={() => handleFavoriteMovie(movie)}>
           <Ionicons
-            name="bookmark"
+            name={favoriteMovie ? "bookmark" : "bookmark-outline"}
             size={28}
             color="#FFF"
           />
