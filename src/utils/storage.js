@@ -19,9 +19,7 @@ export async function saveMovie(key, newMovie) {
 
   moviesStored.push(newMovie);
 
-  await AsyncStorage.setItem(key, JSON.stringify(moviesStored));
-  
-  alert("Filme salvo com sucesso!");
+  await AsyncStorage.setItem(key, JSON.stringify(moviesStored)); 
 }
 
 export async function deleteMovie(id) {
@@ -32,8 +30,6 @@ export async function deleteMovie(id) {
   })
 
   await AsyncStorage.setItem('my-movies', JSON.stringify(myMovies));
-
-  alert("Filme removido da sua lista de itens salvos!");
 
   return myMovies;
 }
